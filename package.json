@@ -2,19 +2,63 @@
   "name": "@code-alchemist/omnichannel-chatbot-sdk",
   "version": "0.1.0",
   "description": "A comprehensive Node.js SDK for building production-ready chatbots with multi-platform support, live chat handoff, broadcast messaging, and AI-powered responses.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./plugins": {
+      "import": {
+        "types": "./dist/plugins/index.d.ts",
+        "default": "./dist/plugins/index.js"
+      },
+      "require": {
+        "types": "./dist/plugins/index.d.cts",
+        "default": "./dist/plugins/index.cjs"
+      }
+    },
+    "./platforms": {
+      "import": {
+        "types": "./dist/platforms/index.d.ts",
+        "default": "./dist/platforms/index.js"
+      },
+      "require": {
+        "types": "./dist/platforms/index.d.cts",
+        "default": "./dist/platforms/index.cjs"
+      }
+    }
+  },
   "files": [
     "dist",
     "migrations"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "lint": "eslint src --ext .ts",
-    "prepublishOnly": "npm run build"
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "biome check src/",
+    "lint:fix": "biome check --write src/",
+    "format": "biome format --write src/",
+    "check": "biome check --write src/ && npm run typecheck",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "prepublishOnly": "npm run build",
+    "changeset": "changeset",
+    "release": "changeset publish"
   },
   "bin": {
     "omnichannel-chatbot": "./bin/cli.js"
@@ -27,8 +71,12 @@
     "broadcast",
     "ai",
     "gemini",
+    "openai",
+    "anthropic",
     "supabase",
-    "omnichannel"
+    "omnichannel",
+    "conversational-ai",
+    "bot-framework"
   ],
   "author": "Code Alchemist Dev",
   "license": "MIT",
@@ -41,25 +89,40 @@
   },
   "homepage": "https://github.com/code-alchemist-dev/omnichannel-chatbot-sdk#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "peerDependencies": {
-    "@supabase/supabase-js": "^2.0.0"
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "peerDependenciesMeta": {
+    "@supabase/supabase-js": {
+      "optional": true
+    }
   },
   "dependencies": {
-    "express": "^4.18.0",
-    "grammy": "^1.20.0",
-    "twilio": "^4.0.0",
-    "winston": "^3.11.0"
+    "grammy": "^1.21.0",
+    "@whiskeysockets/baileys": "^6.7.0",
+    "twilio": "^5.0.0",
+    "@google/generative-ai": "^0.21.0",
+    "ai": "^3.4.0",
+    "openai": "^4.67.0",
+    "@anthropic-ai/sdk": "^0.30.0",
+    "drizzle-orm": "^0.33.0",
+    "zod": "^3.23.0",
+    "winston": "^3.14.0",
+    "express": "^4.21.0",
+    "nanoid": "^5.0.0",
+    "eventemitter3": "^5.0.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^20.10.0",
-    "typescript": "^5.3.0",
-    "jest": "^29.7.0",
-    "@types/jest": "^29.5.0",
-    "eslint": "^8.55.0",
-    "@typescript-eslint/eslint-plugin": "^6.13.0",
-    "@typescript-eslint/parser": "^6.13.0"
+    "typescript": "^5.6.0",
+    "tsup": "^8.3.0",
+    "@types/node": "^22.7.0",
+    "@types/express": "^5.0.0",
+    "vitest": "^2.1.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "@biomejs/biome": "^1.9.0",
+    "drizzle-kit": "^0.24.0",
+    "@changesets/cli": "^2.27.0"
   }
 }
