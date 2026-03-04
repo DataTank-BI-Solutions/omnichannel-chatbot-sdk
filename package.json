@@ -1,6 +1,6 @@
 {
   "name": "@code-alchemist/omnichannel-chatbot-sdk",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A comprehensive Node.js SDK for building production-ready chatbots with multi-platform support, live chat handoff, broadcast messaging, and AI-powered responses.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -38,7 +38,10 @@
       }
     }
   },
-  "files": ["dist", "migrations"],
+  "files": [
+    "dist",
+    "migrations"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -79,12 +82,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/code-alchemist-dev/omnichannel-chatbot-sdk.git"
+    "url": "git+https://github.com/DataTank-BI-Solutions/omnichannel-chatbot-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/code-alchemist-dev/omnichannel-chatbot-sdk/issues"
+    "url": "https://github.com/DataTank-BI-Solutions/omnichannel-chatbot-sdk/issues"
   },
-  "homepage": "https://github.com/code-alchemist-dev/omnichannel-chatbot-sdk#readme",
+  "homepage": "https://github.com/DataTank-BI-Solutions/omnichannel-chatbot-sdk#readme",
   "engines": {
     "node": ">=20.0.0"
   },

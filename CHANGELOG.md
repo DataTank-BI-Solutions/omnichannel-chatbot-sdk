@@ -1,5 +1,64 @@
 # Changelog
 
+## 1.0.0
+
+### Major Changes
+
+- # 🎉 Initial Release - v0.1.0
+
+  ## Features
+
+  ### Core SDK
+
+  - Multi-platform chatbot framework (Telegram, WhatsApp)
+  - TypeScript-first with full type safety
+  - Modular plugin architecture
+  - Middleware system for request processing
+  - Session management
+  - Flow builder with scenes
+  - Database integration (Supabase/PostgreSQL)
+
+  ### Built-in Plugins
+
+  - **LiveChatPlugin** - Agent handoff with round-robin assignment, queue management
+  - **BroadcastPlugin** - Mass messaging with rate limiting and delivery tracking
+  - **AIPlugin** - Gemini AI integration with intent detection and conversation memory
+
+  ### Admin Panel
+
+  - REST API for chatbot management
+  - Supabase Authentication with JWT tokens
+  - Role-based access control (Admin, Agent, Viewer)
+  - 15 granular permissions
+  - Complete CRUD endpoints for conversations, users, broadcasts, agents
+  - Analytics and settings endpoints
+
+  ### Developer Tools
+
+  - CLI tool for scaffolding projects (`omnichannel-chatbot init`)
+  - Database migration command
+  - Template generators for plugins and platforms
+  - Comprehensive documentation
+  - 471 passing tests with 80%+ coverage
+
+  ### Platforms
+
+  - Telegram with full feature support
+  - WhatsApp via Twilio
+
+  ## Documentation
+
+  - Complete API reference
+  - Setup guides
+  - Examples and tutorials
+  - Admin panel setup guide
+
+  ## Testing
+
+  - 471 tests passing
+  - 80%+ code coverage
+  - Automated CI/CD with GitHub Actions
+
 All notable changes to the Omnichannel Chatbot SDK will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
