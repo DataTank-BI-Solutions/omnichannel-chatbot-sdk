@@ -1,111 +1,230 @@
-# Omnichannel Chatbot SDK
+# 🤖 Omnichannel Chatbot SDK
 
-A comprehensive Node.js SDK for building production-ready chatbots with multi-platform support, live chat handoff, broadcast messaging, and AI-powered responses.
+<div align="center">
 
-## Features
+[![npm version](https://badge.fury.io/js/@code-alchemist%2Fomnichannel-chatbot-sdk.svg)](https://www.npmjs.com/package/@code-alchemist/omnichannel-chatbot-sdk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/tests-471%20passing-brightgreen)](.)
 
-- **Multi-Platform Support** - Telegram and WhatsApp out of the box
-- **Live Chat Handoff** - Seamlessly transfer conversations to human agents
-- **Broadcast Messaging** - Send announcements to all contacts with rate limiting
-- **AI-Powered Responses** - Integrate with Gemini, OpenAI, or other LLMs
-- **Feature Toggles** - Subscription-based feature control via Service API
-- **Admin Panel** - Built-in admin dashboard for managing conversations
-- **Plugin Architecture** - Extend functionality with custom plugins
+**A comprehensive Node.js SDK for building production-ready chatbots with multi-platform support, live chat handoff, broadcast messaging, and AI-powered responses.**
 
-## Quick Start
+[Quick Start](#-quick-start) • [Features](#-features) • [Documentation](#-documentation) • [Examples](#-examples)
+
+</div>
+
+---
+
+## ✨ Features
+
+- 🚀 **Multi-Platform** - Telegram, WhatsApp (more coming soon)
+- 🎯 **Built-in Plugins** - Live Chat, Broadcast, AI Assistant
+- 🔐 **Admin Panel** - REST API with Supabase Auth & RBAC
+- 📊 **Database** - Supabase/PostgreSQL with Drizzle ORM
+- 🧪 **Type-Safe** - Full TypeScript with 471 passing tests
+- 🛠️ **CLI Tool** - Scaffold projects instantly
+- 🔌 **Extensible** - Plugin & middleware architecture
+
+---
+
+## 📦 Installation
 
 ```bash
 npm install @code-alchemist/omnichannel-chatbot-sdk
 ```
 
-```javascript
-const { Chatbot, LiveChatPlugin, BroadcastPlugin, AIPlugin } = require('@code-alchemist/omnichannel-chatbot-sdk');
+Or create a new project with CLI:
+
+```bash
+npx @code-alchemist/omnichannel-chatbot-sdk init my-bot
+```
+
+---
+
+## 🚀 Quick Start
+
+```typescript
+import { Chatbot } from "@code-alchemist/omnichannel-chatbot-sdk";
 
 const bot = new Chatbot({
-  database: {
-    provider: 'supabase',
-    url: process.env.SUPABASE_URL,
-    serviceKey: process.env.SUPABASE_SERVICE_ROLE_KEY
-  },
   platforms: {
-    telegram: { token: process.env.TELEGRAM_BOT_TOKEN },
-    whatsapp: {
-      provider: 'twilio',
-      accountSid: process.env.TWILIO_ACCOUNT_SID,
-      authToken: process.env.TWILIO_AUTH_TOKEN,
-      number: process.env.TWILIO_WHATSAPP_NUMBER
-    }
-  }
+    telegram: { token: process.env.TELEGRAM_BOT_TOKEN! },
+  },
 });
 
-// Add features
-bot.use(new LiveChatPlugin());
+bot.command("start", async (ctx) => {
+  await ctx.reply("👋 Welcome!");
+});
+
+await bot.start();
+```
+
+### With Plugins
+
+```typescript
+import {
+  Chatbot,
+  LiveChatPlugin,
+  BroadcastPlugin,
+  AIPlugin,
+} from "@code-alchemist/omnichannel-chatbot-sdk";
+
+const bot = new Chatbot({
+  platforms: { telegram: { token: process.env.TELEGRAM_BOT_TOKEN! } },
+  database: { provider: "supabase", url: process.env.DATABASE_URL! },
+});
+
+// Add live chat support
+bot.use(new LiveChatPlugin({ autoAssign: true }));
+
+// Add broadcast messaging
 bot.use(new BroadcastPlugin());
-bot.use(new AIPlugin({ provider: 'gemini', apiKey: process.env.GEMINI_API_KEY }));
 
-// Serve admin panel
-bot.serveAdmin({ port: 3000 });
+// Add AI responses
+bot.use(
+  new AIPlugin({
+    provider: "gemini",
+    apiKey: process.env.GEMINI_API_KEY!,
+  })
+);
 
-// Start
-bot.start();
+await bot.start();
 ```
 
-## Documentation
+---
 
-- [Getting Started](docs/getting-started.md)
-- [Configuration](docs/configuration.md)
-- [Plugins](docs/plugins.md)
-- [Admin Panel](docs/admin-panel.md)
-- [Service API](docs/service-api.md)
-- [Custom Plugins](docs/custom-plugins.md)
-- [Database Migrations](docs/migrations.md)
-- [API Reference](docs/api-reference.md)
+## 📖 Documentation
 
-## Architecture
+### Platform Support
 
+| Platform | Status | Features                           |
+| -------- | ------ | ---------------------------------- |
+| Telegram | ✅     | Messages, Commands, Media, Buttons |
+| WhatsApp | ✅     | Messages, Media, Templates         |
+| Discord  | 🚧     | Planned                            |
+| Facebook | 🚧     | Planned                            |
+
+### Plugins
+
+#### Live Chat
+
+Human agent handoff with queue management.
+
+```typescript
+const liveChat = new LiveChatPlugin({
+  autoAssign: true,
+  maxConversationsPerAgent: 5,
+});
+
+liveChat.addAgent({
+  id: "agent-1",
+  name: "Alice",
+  email: "alice@example.com",
+  status: "online",
+  maxConversations: 5,
+});
 ```
-@code-alchemist/omnichannel-chatbot-sdk/
-├── src/
-│   ├── Chatbot.ts              # Main entry point
-│   ├── core/                   # Core functionality
-│   │   ├── Context.ts          # Message context
-│   │   ├── Router.ts           # Message routing
-│   │   └── Middleware.ts       # Middleware system
-│   ├── platforms/              # Platform adapters
-│   │   ├── TelegramPlatform.ts
-│   │   └── WhatsAppPlatform.ts
-│   ├── plugins/                # Built-in plugins
-│   │   ├── LiveChatPlugin.ts
-│   │   ├── BroadcastPlugin.ts
-│   │   └── AIPlugin.ts
-│   ├── database/               # Database adapters
-│   │   └── SupabaseAdapter.ts
-│   └── admin/                  # Admin panel
-└── migrations/                 # Database setup scripts
+
+#### Broadcast
+
+Mass messaging with rate limiting.
+
+```typescript
+const broadcast = new BroadcastPlugin();
+
+const campaign = broadcast.createBroadcast("Announcement", {
+  text: "🎉 New feature!",
+});
+
+await broadcast.sendBroadcast(campaign.id);
 ```
 
-## Supported Platforms
+#### AI Assistant
 
-| Platform | Provider | Status |
-|----------|----------|--------|
-| Telegram | Telegram Bot API | Supported |
-| WhatsApp | Twilio | Supported |
-| WhatsApp | whatsapp-web.js | Supported |
-| Discord | - | Planned |
-| Facebook Messenger | - | Planned |
+Gemini AI integration.
 
-## Supported AI Providers
+```typescript
+const ai = new AIPlugin({
+  provider: "gemini",
+  apiKey: process.env.GEMINI_API_KEY!,
+  enableIntentDetection: true,
+});
+```
 
-| Provider | Status |
-|----------|--------|
-| Google Gemini | Supported |
-| OpenAI | Planned |
-| Anthropic Claude | Planned |
+### Admin Panel
 
-## License
+Setup admin API for managing your chatbot:
 
-MIT
+```typescript
+import express from "express";
+import { AdminAPI } from "@code-alchemist/omnichannel-chatbot-sdk";
 
-## Contributing
+const app = express();
+const adminAPI = new AdminAPI(bot, {
+  jwtSecret: process.env.ADMIN_JWT_SECRET!,
+});
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+app.use("/api/admin", adminAPI.router);
+```
+
+**Endpoints**: Login, Conversations, Users, Broadcasts, Agents, Analytics
+
+See [Admin Panel Setup Guide](./docs/admin-panel-setup.md) for details.
+
+---
+
+## 💡 Examples
+
+- [Basic Bot](./examples/test-plugins.cjs)
+- [Admin API](./examples/admin-api.ts)
+- [Full Documentation](./docs)
+
+---
+
+## 🏗️ CLI
+
+```bash
+# Create project
+omnichannel-chatbot init my-bot
+
+# Run migrations
+omnichannel-chatbot migrate
+
+# Generate templates
+omnichannel-chatbot generate plugin
+omnichannel-chatbot generate platform
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Watch mode
+npm run test:coverage # With coverage
+```
+
+**471 tests passing** | **80%+ coverage**
+
+---
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+---
+
+## 📄 License
+
+MIT © [Code Alchemist Dev](https://github.com/code-alchemist-dev)
+
+---
+
+<div align="center">
+
+Made with ❤️ by Code Alchemist Dev
+
+⭐ Star us if this project helped you!
+
+</div>
