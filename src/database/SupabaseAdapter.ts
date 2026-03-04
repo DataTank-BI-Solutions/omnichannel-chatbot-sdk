@@ -118,8 +118,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async findUser(id: string): Promise<User | undefined> {
     this._ensureConnected();
 
-    const [user] = await this._db!
-      .select()
+    const [user] = await this._db!.select()
       .from(schema.users)
       .where(eq(schema.users.id, id))
       .limit(1);
@@ -136,8 +135,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   ): Promise<User | undefined> {
     this._ensureConnected();
 
-    const [user] = await this._db!
-      .select()
+    const [user] = await this._db!.select()
       .from(schema.users)
       .where(and(eq(schema.users.platform, platform), eq(schema.users.platformId, platformId)))
       .limit(1);
@@ -151,8 +149,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async createUser(data: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     this._ensureConnected();
 
-    const [user] = await this._db!
-      .insert(schema.users)
+    const [user] = await this._db!.insert(schema.users)
       .values({
         platformId: data.platformId,
         platform: data.platform,
@@ -179,8 +176,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async updateUser(id: string, data: Partial<User>): Promise<User> {
     this._ensureConnected();
 
-    const [user] = await this._db!
-      .update(schema.users)
+    const [user] = await this._db!.update(schema.users)
       .set({
         ...data,
         updatedAt: new Date(),
@@ -205,8 +201,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async findConversation(id: string): Promise<Conversation | undefined> {
     this._ensureConnected();
 
-    const [conversation] = await this._db!
-      .select()
+    const [conversation] = await this._db!.select()
       .from(schema.conversations)
       .where(eq(schema.conversations.id, id))
       .limit(1);
@@ -220,8 +215,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async findActiveConversation(userId: string): Promise<Conversation | undefined> {
     this._ensureConnected();
 
-    const [conversation] = await this._db!
-      .select()
+    const [conversation] = await this._db!.select()
       .from(schema.conversations)
       .where(
         and(eq(schema.conversations.userId, userId), eq(schema.conversations.status, 'active'))
@@ -238,8 +232,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async createConversation(data: Omit<Conversation, 'id'>): Promise<Conversation> {
     this._ensureConnected();
 
-    const [conversation] = await this._db!
-      .insert(schema.conversations)
+    const [conversation] = await this._db!.insert(schema.conversations)
       .values({
         platform: data.platform,
         chatId: data.chatId,
@@ -265,8 +258,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async updateConversation(id: string, data: Partial<Conversation>): Promise<Conversation> {
     this._ensureConnected();
 
-    const [conversation] = await this._db!
-      .update(schema.conversations)
+    const [conversation] = await this._db!.update(schema.conversations)
       .set(data)
       .where(eq(schema.conversations.id, id))
       .returning();
@@ -288,8 +280,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async saveMessage(message: StoredMessage): Promise<StoredMessage> {
     this._ensureConnected();
 
-    const [savedMessage] = await this._db!
-      .insert(schema.messages)
+    const [savedMessage] = await this._db!.insert(schema.messages)
       .values({
         id: message.id,
         conversationId: message.conversationId,
@@ -314,8 +305,7 @@ export class SupabaseAdapter implements IDatabaseAdapter {
   async getConversationMessages(conversationId: string, limit = 50): Promise<StoredMessage[]> {
     this._ensureConnected();
 
-    const messages = await this._db!
-      .select()
+    const messages = await this._db!.select()
       .from(schema.messages)
       .where(eq(schema.messages.conversationId, conversationId))
       .orderBy(desc(schema.messages.createdAt))

@@ -121,6 +121,77 @@ export type {
 export * from './database/index.js';
 
 // ============================================================================
+// Platform Exports
+// ============================================================================
+
+export { TelegramPlatform } from './platforms/TelegramPlatform.js';
+export { WhatsAppPlatform } from './platforms/WhatsAppPlatform.js';
+export { BasePlatform } from './platforms/BasePlatform.js';
+
+// ============================================================================
+// Plugin Exports
+// ============================================================================
+
+export {
+  BasePlugin,
+  LiveChatPlugin,
+  BroadcastPlugin,
+  AIPlugin,
+  type Agent,
+  type AgentStatus,
+  type LiveChatConfig,
+  type Broadcast,
+  type BroadcastContact,
+  type BroadcastConfig,
+  type BroadcastRecipient,
+  type BroadcastStats,
+  type BroadcastStatus,
+  type DeliveryStatus,
+  type AudienceFilter,
+  type AIPluginConfig,
+  type ConversationTurn,
+  type Intent,
+} from './plugins/index.js';
+
+// ============================================================================
+// Admin Panel Exports
+// ============================================================================
+
+export {
+  AdminAPI,
+  SupabaseAuthProvider,
+  createAuthMiddleware,
+  requirePermission,
+  requireRole,
+  type SupabaseAuthConfig,
+  type AdminConfig,
+  type AdminUser,
+  type UserRole,
+  type Permission,
+  type TokenPayload,
+  type LoginCredentials,
+  type AuthResponse,
+  type AuthenticatedRequest,
+  type PaginationQuery,
+  type PaginatedResponse,
+  type ApiResponse,
+  type ConversationFilters,
+  type ConversationDetails,
+  type AssignConversationRequest,
+  type UserFilters,
+  type UserDetails,
+  type BroadcastFilters,
+  type BroadcastDetails,
+  type CreateBroadcastRequest,
+  type AnalyticsMetrics,
+  type AgentMetrics,
+  type DateRange,
+  type WebSocketEvent,
+  type WebSocketMessage,
+  type AdminRoutes,
+} from './admin/index.js';
+
+// ============================================================================
 // Version
 // ============================================================================
 

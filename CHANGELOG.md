@@ -7,6 +7,183 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Phase 6: Admin Panel (In Progress - 70%)
+
+#### Admin API
+
+- **Headless REST API** for chatbot management
+- **Supabase Authentication** for admin users
+  - Email/password login
+  - JWT token-based authentication
+  - Refresh token support (7-day expiry)
+  - Access token (24-hour expiry)
+- **Role-Based Access Control (RBAC)**
+  - 3 roles: Admin, Agent, Viewer
+  - 15 granular permissions for fine-grained access control
+  - Permission checking middleware
+  - Role checking middleware
+- **API Endpoints:**
+  - **Authentication**: Login, logout, refresh, get current user
+  - **Conversations**: List, view details, assign to agent, close
+  - **Users**: List chatbot users, view user details
+  - **Broadcasts**: List, create, send campaigns
+  - **Agents**: List agents, add new agents
+  - **Analytics**: Dashboard metrics (basic structure)
+  - **Settings**: View system configuration
+- **Feature Toggles**:
+  - Enable/disable analytics, broadcasts, liveChat, userManagement
+- **Security Features**:
+  - CORS configuration
+  - Rate limiting support
+  - Request logging
+  - Protected routes with authentication middleware
+- **Type Safety**: Full TypeScript definitions for all endpoints
+- **Express Integration**: Drop-in Express router for easy integration
+
+**Dependencies Added:**
+
+- `@supabase/supabase-js` - Supabase authentication client
+- `cors` - CORS middleware for Express
+- `@types/cors` - TypeScript types for CORS
+
+**Files:**
+
+- `src/admin/AdminAPI.ts` (664 lines) - Main admin API implementation
+- `src/admin/auth.ts` (509 lines) - Authentication provider and middleware
+- `src/admin/types.ts` (383 lines) - TypeScript definitions
+- `src/admin/index.ts` - Module exports
+
+### Added - Phase 5: Built-in Plugins (Complete - 100%)
+
+#### LiveChatPlugin
+
+- Complete live chat agent handoff system
+- Agent management (add, remove, get, update status)
+- Agent availability tracking (online/offline/busy)
+- Automatic conversation assignment with round-robin algorithm
+- Manual conversation assignment support
+- Agent capacity management (max conversations per agent)
+- Conversation queue for busy times
+- End conversation functionality with agent cleanup
+- 40 comprehensive tests with 100% coverage
+- 272 lines of production-ready code
+
+**Features:**
+
+- `addAgent()` - Register agents with capacity limits
+- `removeAgent()` - Unregister agents
+- `getAgent()` / `getAllAgents()` - Query agent information
+- `getAvailableAgents()` - Find online agents with capacity
+- `updateAgentStatus()` - Change agent availability
+- `requestAgent()` - User request for live agent
+- `assignAgent()` - Manual assignment to specific agent
+- `endConversation()` - Release agent and end session
+- `getAssignedAgent()` / `isAssigned()` - Query assignment status
+
+**Configuration:**
+
+- Auto-assign conversations (default: true)
+- Max conversations per agent (default: 5)
+- Agent response timeout (default: 300s)
+
+#### BroadcastPlugin
+
+- Complete broadcast messaging system for campaigns
+- Contact management with platform filtering
+- Audience targeting by platform and exclusion lists
+- Rate limiting per platform (Telegram: 25 msg/s, WhatsApp: 10 msg/s)
+- Automatic retry with exponential backoff (default: 3 attempts)
+- Delivery tracking with detailed status (sent/failed/pending/skipped)
+- Broadcast lifecycle management (draft/queued/sending/completed/cancelled)
+- Statistics and success rate calculation
+- 33 comprehensive tests with 100% coverage
+- 577 lines of production-ready code
+
+**Features:**
+
+- `addContact()` / `removeContact()` - Manage broadcast contacts
+- `getAllContacts()` - Query contacts with filtering
+- `createBroadcast()` - Create new broadcast campaign
+- `sendBroadcast()` - Execute broadcast with rate limiting
+- `cancelBroadcast()` - Cancel pending broadcasts
+- `getBroadcastStats()` - Get delivery statistics
+- `getRecipients()` - Query recipient delivery status
+
+**Configuration:**
+
+- Platform-specific rate limits (messages per second)
+- Retry configuration (max attempts, backoff delay)
+- WhatsApp template support
+- Contact auto-sync from sessions
+
+#### AIPlugin
+
+- Complete AI-powered response generation system
+- Gemini integration as primary AI provider
+- Intent detection with built-in and custom intents
+- Conversation history management with TTL
+- Streaming response support
+- Multi-turn conversation context
+- Fallback handling for errors
+- 34 comprehensive tests with 100% coverage
+- 582 lines of production-ready code
+
+**Features:**
+
+- `generateResponse()` - Generate AI responses with context
+- `generateStreamingResponse()` - Stream responses in chunks
+- `clearHistory()` / `getHistory()` - Manage conversation history
+- Intent detection: greeting, farewell, human_support, general_inquiry
+- Custom intent configuration support
+- Configurable response formatting (tone, length, emojis)
+- Memory management with TTL and turn limits
+- Provider abstraction for future OpenAI/Anthropic support
+
+**Configuration:**
+
+- AI provider selection (Gemini, OpenAI, Anthropic)
+- Model configuration (model, temperature, maxTokens)
+- System prompt customization
+- Intent detection settings (built-in + custom)
+- Response formatting (tone, max length, emoji usage)
+- Conversation memory (enabled, max turns, TTL)
+- Fallback message configuration
+
+#### Plugin Infrastructure
+
+- Exported all three plugins from main SDK: LiveChatPlugin, BroadcastPlugin, AIPlugin
+- Added platform exports (TelegramPlatform, WhatsAppPlatform, BasePlatform)
+- Updated plugin module exports with all types
+- Full ESM + CJS bundle support
+
+**Files:**
+
+- `src/plugins/LiveChatPlugin.ts` - Live chat plugin (272 lines)
+- `src/plugins/LiveChatPlugin.test.ts` - 40 tests
+- `src/plugins/BroadcastPlugin.ts` - Broadcast plugin (577 lines)
+- `src/plugins/BroadcastPlugin.test.ts` - 33 tests
+- `src/plugins/AIPlugin.ts` - AI plugin (582 lines)
+- `src/plugins/AIPlugin.test.ts` - 34 tests
+- `src/plugins/index.ts` - Plugin exports
+- `src/index.ts` - Main SDK exports updated
+
+### Changed
+
+#### Test Coverage
+
+- Increased test count from 310 to 417 tests (+107 new plugin tests)
+- Added 40 LiveChatPlugin tests (100% coverage)
+- Added 33 BroadcastPlugin tests (100% coverage)
+- Added 34 AIPlugin tests (100% coverage)
+- Maintained 80%+ code coverage across all modules
+
+#### Documentation
+
+- Updated `ROADMAP.md` to mark Phase 5 as 100% complete
+- Updated test statistics: 417 tests passing
+- All three plugins implemented and tested
+- Phase 5 milestone: LiveChatPlugin ✅, BroadcastPlugin ✅, AIPlugin ✅
+
 ### Added - Phase 3: Database Layer (Complete)
 
 #### Drizzle ORM Schema
@@ -272,6 +449,7 @@ See [ROADMAP.md](./ROADMAP.md) for detailed development plan.
 ### Added - Phase 4: Platform Adapters (Complete)
 
 #### TelegramPlatform
+
 - Complete Telegram bot integration using grammY library
 - Webhook and polling mode support
 - Full message type support (text, image, video, audio, document, location, contact)
@@ -282,7 +460,7 @@ See [ROADMAP.md](./ROADMAP.md) for detailed development plan.
 - 377 lines of production-ready code
 
 #### WhatsAppPlatform
+
 - Platform structure and placeholder implementation
 - Ready for Baileys or Twilio integration
 - Follows BasePlatform architecture
-

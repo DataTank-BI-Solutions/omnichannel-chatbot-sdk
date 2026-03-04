@@ -38,10 +38,7 @@
       }
     }
   },
-  "files": [
-    "dist",
-    "migrations"
-  ],
+  "files": ["dist", "migrations"],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -92,7 +89,7 @@
     "node": ">=20.0.0"
   },
   "peerDependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "2.98.0"
   },
   "peerDependenciesMeta": {
     "@supabase/supabase-js": {
@@ -102,8 +99,11 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.0",
     "@google/generative-ai": "^0.21.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "@types/cors": "^2.8.19",
     "@whiskeysockets/baileys": "^6.7.0",
     "ai": "^3.4.0",
+    "cors": "^2.8.6",
     "drizzle-orm": "^0.33.0",
     "eventemitter3": "^5.0.0",
     "express": "^4.21.0",
