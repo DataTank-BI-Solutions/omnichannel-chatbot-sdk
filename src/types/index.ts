@@ -44,7 +44,9 @@ export type MessageType =
   | 'audio'
   | 'document'
   | 'location'
-  | 'contact';
+  | 'contact'
+  | 'sticker'
+  | 'button_click';
 
 export interface IncomingMessage {
   id: string;

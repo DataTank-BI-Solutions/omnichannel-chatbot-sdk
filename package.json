@@ -100,29 +100,30 @@
     }
   },
   "dependencies": {
-    "grammy": "^1.21.0",
-    "@whiskeysockets/baileys": "^6.7.0",
-    "twilio": "^5.0.0",
-    "@google/generative-ai": "^0.21.0",
-    "ai": "^3.4.0",
-    "openai": "^4.67.0",
     "@anthropic-ai/sdk": "^0.30.0",
+    "@google/generative-ai": "^0.21.0",
+    "@whiskeysockets/baileys": "^6.7.0",
+    "ai": "^3.4.0",
     "drizzle-orm": "^0.33.0",
-    "zod": "^3.23.0",
-    "winston": "^3.14.0",
+    "eventemitter3": "^5.0.0",
     "express": "^4.21.0",
+    "grammy": "^1.21.0",
     "nanoid": "^5.0.0",
-    "eventemitter3": "^5.0.0"
+    "openai": "^4.67.0",
+    "postgres": "^3.4.8",
+    "twilio": "^5.0.0",
+    "winston": "^3.14.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.0",
-    "tsup": "^8.3.0",
-    "@types/node": "^22.7.0",
-    "@types/express": "^5.0.0",
-    "vitest": "^2.1.0",
-    "@vitest/coverage-v8": "^2.1.0",
     "@biomejs/biome": "^1.9.0",
+    "@changesets/cli": "^2.27.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.7.0",
+    "@vitest/coverage-v8": "^2.1.0",
     "drizzle-kit": "^0.24.0",
-    "@changesets/cli": "^2.27.0"
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
   }
 }

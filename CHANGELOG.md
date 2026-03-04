@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Phase 3: Database Layer (In Progress)
+
+#### Drizzle ORM Schema
+
+- Created comprehensive database schema using Drizzle ORM
+- Defined `users` table with platform-agnostic user information
+- Defined `conversations` table for chat session tracking
+- Defined `messages` table for message history storage
+- Defined `broadcasts` table for broadcast campaign management
+- Added PostgreSQL enums for conversation status, message direction, and message types
+- Type-safe schema exports with `$inferSelect` and `$inferInsert` types
+- Drizzle Kit configuration for migrations
+
+**Files:**
+
+- `src/database/schema.ts` - Drizzle ORM schema definitions
+- `src/database/index.ts` - Database module exports
+- `drizzle.config.ts` - Drizzle Kit configuration
+
+**Schema Tables:**
+
+- `users` - Platform-agnostic user records
+- `conversations` - Chat session tracking
+- `messages` - Message history
+- `broadcasts` - Broadcast campaigns
+
+### Changed
+
+#### Type Updates
+
+- Added `sticker` and `button_click` to `MessageType` enum
+- Installed `postgres` driver for Drizzle ORM PostgreSQL support
+
 ### Added - Phase 2: Core System Enhancements (Complete)
 
 #### Session Management System
