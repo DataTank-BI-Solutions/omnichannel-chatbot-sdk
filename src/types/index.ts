@@ -271,6 +271,10 @@ export interface ChatbotConfig {
   database?: DatabaseConfig;
   platforms: PlatformsConfig;
   logging?: LoggingConfig;
+  session?: {
+    /** Session TTL in seconds (default: 3600) */
+    ttl?: number;
+  };
 }
 
 export interface DatabaseConfig {

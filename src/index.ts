@@ -16,8 +16,11 @@ export { Chatbot } from './core/Chatbot.js';
 export { Context } from './core/Context.js';
 export { Router } from './core/Router.js';
 export { Middleware } from './core/Middleware.js';
-export { ChatbotError } from './core/ChatbotError.js';
-export { Logger } from './core/Logger.js';
+export { ChatbotError, ErrorCodes } from './core/ChatbotError.js';
+export { Logger, createChatbotLogger } from './core/Logger.js';
+export { validateConfig, safeValidateConfig } from './core/ConfigSchema.js';
+export { SessionManager, MemoryStorage } from './session/index.js';
+export { FlowBuilder, Scene } from './flow/index.js';
 
 // ============================================================================
 // Type Exports
@@ -86,6 +89,30 @@ export type {
   MaybePromise,
   Prettify,
 } from './types/index.js';
+
+// ============================================================================
+// Session Exports
+// ============================================================================
+
+export type {
+  Session,
+  SessionConfig,
+  ISessionStorage,
+} from './session/index.js';
+
+// ============================================================================
+// Flow Exports
+// ============================================================================
+
+export type {
+  FlowContext,
+  FlowState,
+  FlowConfig,
+  SceneConfig,
+  SceneHandler,
+  SceneLeaveHandler,
+  ActiveScene,
+} from './flow/index.js';
 
 // ============================================================================
 // Version

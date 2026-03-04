@@ -1,4 +1,6 @@
 import EventEmitter from 'eventemitter3';
+import type { FlowBuilder } from '../flow/FlowBuilder.js';
+import { SessionManager } from '../session/index.js';
 import type {
   BroadcastFilter,
   BulkMessageResult,
@@ -20,6 +22,7 @@ import type {
   RouteHandler,
 } from '../types/index.js';
 import { ChatbotError, ErrorCodes } from './ChatbotError.js';
+import { safeValidateConfig } from './ConfigSchema.js';
 import { Context } from './Context.js';
 import { createChatbotLogger } from './Logger.js';
 import { compose } from './Middleware.js';
@@ -27,32 +30,93 @@ import { Router } from './Router.js';
 
 /**
  * Main Chatbot class - the entry point for the SDK
+ *
+ * @example
+ * ```typescript
+ * import { Chatbot } from '@code-alchemist/omnichannel-chatbot-sdk';
+ *
+ * const bot = new Chatbot({
+ *   platforms: {
+ *     telegram: {
+ *       enabled: true,
+ *       token: process.env.TELEGRAM_TOKEN!,
+ *     },
+ *   },
+ *   logging: {
+ *     level: 'info',
+ *     format: 'pretty',
+ *   },
+ * });
+ *
+ * bot.command('start', async (ctx) => {
+ *   await ctx.reply('Welcome to the bot!');
+ * });
+ *
+ * await bot.start();
+ * ```
  */
 export class Chatbot implements IChatbot {
   public readonly config: ChatbotConfig;
   public readonly platforms: Map<PlatformType, IPlatform> = new Map();
   public readonly plugins: Map<string, IPlugin> = new Map();
+  public readonly flows: Map<string, FlowBuilder> = new Map();
   public readonly router: IRouter;
   public readonly logger: ILogger;
+  public readonly session: SessionManager;
   public database?: IDatabaseAdapter;
 
   private readonly _emitter: EventEmitter;
   private _started = false;
 
   constructor(config: ChatbotConfig) {
-    this.config = config;
+    // Validate configuration
+    const validation = safeValidateConfig(config);
+    if (!validation.success) {
+      const errorMessages = validation.error.errors
+        .map((err) => `${err.path.join('.')}: ${err.message}`)
+        .join(', ');
+      throw new ChatbotError(
+        ErrorCodes.CONFIG_INVALID,
+        `Invalid chatbot configuration: ${errorMessages}`,
+        { errors: validation.error.errors }
+      );
+    }
+
+    this.config = validation.data;
     this.router = new Router();
     this.logger = createChatbotLogger(config.logging);
+    this.session = new SessionManager({
+      ttl: config.session?.ttl ?? 3600,
+    });
     this._emitter = new EventEmitter();
   }
 
   /**
    * Register a plugin or middleware
+   *
+   * @param pluginOrMiddleware - Plugin instance or middleware function to register
+   *
+   * @example
+   * ```typescript
+   * // Register a plugin
+   * bot.use(new LiveChatPlugin());
+   *
+   * // Register a middleware function
+   * bot.use(async (ctx, next) => {
+   *   console.log(`Received: ${ctx.message.text}`);
+   *   await next();
+   * });
+   *
+   * // Register a middleware class
+   * bot.use(new LoggingMiddleware());
+   * ```
    */
   use(pluginOrMiddleware: IPlugin | MiddlewareFunction | IMiddleware): void {
     // Check if it's a plugin (has install method)
     if (this._isPlugin(pluginOrMiddleware)) {
-      this._installPlugin(pluginOrMiddleware);
+      this._installPlugin(pluginOrMiddleware).catch((error) => {
+        this.logger.error(error.code || 'PLUGIN_INSTALL_FAILED', { error });
+      });
     } else {
       // It's middleware
       this.router.use(pluginOrMiddleware as MiddlewareFunction | IMiddleware);
@@ -61,6 +125,21 @@ export class Chatbot implements IChatbot {
 
   /**
    * Register a command handler
+   *
+   * @param command - Command name (without leading slash)
+   * @param handler - Async function to handle the command
+   *
+   * @example
+   * ```typescript
+   * bot.command('start', async (ctx) => {
+   *   await ctx.reply('Hello! Use /help to see available commands.');
+   * });
+   *
+   * bot.command('echo', async (ctx) => {
+   *   const args = ctx.state.get<{ args?: string }>('params')?.args;
+   *   await ctx.reply(args || 'Nothing to echo');
+   * });
+   * ```
    */
   command(command: string, handler: RouteHandler): void {
     this.router.command(command, handler);
@@ -68,6 +147,20 @@ export class Chatbot implements IChatbot {
 
   /**
    * Register an event handler for message types
+   *
+   * @param event - Message type to listen for (e.g., 'text', 'image', 'video')
+   * @param handler - Async function to handle messages of this type
+   *
+   * @example
+   * ```typescript
+   * bot.on('image', async (ctx) => {
+   *   await ctx.reply('Thanks for the image!');
+   * });
+   *
+   * bot.on('text', async (ctx) => {
+   *   await ctx.reply(`You said: ${ctx.message.text}`);
+   * });
+   * ```
    */
   on(event: MessageType, handler: RouteHandler): void {
     this.router.on(event, handler);
@@ -75,20 +168,108 @@ export class Chatbot implements IChatbot {
 
   /**
    * Register a text pattern handler
+   *
+   * @param pattern - String (exact match) or RegExp to match against message text
+   * @param handler - Async function to handle matching messages
+   *
+   * @example
+   * ```typescript
+   * // Exact match
+   * bot.text('hello', async (ctx) => {
+   *   await ctx.reply('Hi there!');
+   * });
+   *
+   * // Regex with capture groups
+   * bot.text(/^Hi, my name is (?<name>\w+)$/i, async (ctx) => {
+   *   const params = ctx.state.get<{ name: string }>('params');
+   *   await ctx.reply(`Nice to meet you, ${params?.name}!`);
+   * });
+   * ```
    */
   text(pattern: string | RegExp, handler: RouteHandler): void {
     this.router.text(pattern, handler);
   }
 
   /**
-   * Subscribe to chatbot events
+   * Register a conversation flow
+   *
+   * @param flowBuilder - FlowBuilder instance to register
+   *
+   * @remarks
+   * Flows are automatically handled before command routing. When a user has an
+   * active flow session, all messages will be routed to the flow instead of
+   * normal command handlers.
+   *
+   * @example
+   * ```typescript
+   * const registrationFlow = new FlowBuilder({
+   *   name: 'registration',
+   *   initialScene: 'welcome',
+   * });
+   *
+   * registrationFlow.scene({
+   *   id: 'welcome',
+   *   onEnter: async (ctx) => {
+   *     await ctx.reply('Welcome! What is your name?');
+   *   },
+   *   onMessage: async (ctx) => {
+   *     ctx.flowState.set('name', ctx.message.text);
+   *     await ctx.enterScene('email');
+   *   },
+   * });
+   *
+   * bot.flow(registrationFlow);
+   *
+   * bot.command('register', async (ctx) => {
+   *   await registrationFlow.enter(ctx, bot.session);
+   * });
+   * ```
+   */
+  flow(flowBuilder: FlowBuilder): void {
+    if (this.flows.has(flowBuilder.name)) {
+      this.logger.warn(`Flow "${flowBuilder.name}" is already registered`);
+      return;
+    }
+
+    this.flows.set(flowBuilder.name, flowBuilder);
+    this.logger.debug(`Registered flow: ${flowBuilder.name}`);
+  }
+
+  /**
+   * Subscribe to chatbot lifecycle events
+   *
+   * @param event - Event name to listen for ('start', 'stop', 'message', 'error', etc.)
+   * @param handler - Async function to handle the event
+   *
+   * @example
+   * ```typescript
+   * bot.onEvent('start', () => {
+   *   console.log('Bot started!');
+   * });
+   *
+   * bot.onEvent('error', (error) => {
+   *   console.error('Bot error:', error);
+   * });
+   *
+   * bot.onEvent('message', (ctx) => {
+   *   console.log(`Message from ${ctx.user.platformId}`);
+   * });
+   * ```
    */
   onEvent<T = unknown>(event: ChatbotEvent, handler: ChatbotEventHandler<T>): void {
     this._emitter.on(event, handler);
   }
 
   /**
-   * Start the chatbot
+   * Start the chatbot and initialize all platforms
+   *
+   * @throws {ChatbotError} If chatbot is already started
+   *
+   * @example
+   * ```typescript
+   * await bot.start();
+   * console.log('Bot is now running!');
+   * ```
    */
   async start(): Promise<void> {
     if (this._started) {
@@ -111,7 +292,18 @@ export class Chatbot implements IChatbot {
   }
 
   /**
-   * Stop the chatbot
+   * Stop the chatbot and gracefully shutdown all platforms and plugins
+   *
+   * @throws {ChatbotError} If chatbot is not started
+   *
+   * @example
+   * ```typescript
+   * // Graceful shutdown on SIGINT
+   * process.on('SIGINT', async () => {
+   *   await bot.stop();
+   *   process.exit(0);
+   * });
+   * ```
    */
   async stop(): Promise<void> {
     if (!this._started) {
@@ -151,7 +343,24 @@ export class Chatbot implements IChatbot {
   }
 
   /**
-   * Broadcast a message to multiple users
+   * Broadcast a message to multiple users (requires database)
+   *
+   * @param message - Message to broadcast
+   * @param filter - Optional filter for targeting specific users
+   * @returns Results of the broadcast operation
+   * @throws {ChatbotError} If chatbot is not started
+   *
+   * @example
+   * ```typescript
+   * await bot.broadcast(
+   *   { type: 'text', text: 'Important announcement!' },
+   *   { platform: 'telegram' }
+   * );
+   * ```
+   *
+   * @remarks
+   * This feature requires a database adapter to be configured.
+   * Currently returns empty results (implementation pending).
    */
   async broadcast(
     _message: OutgoingMessage,
@@ -173,6 +382,15 @@ export class Chatbot implements IChatbot {
 
   /**
    * Handle an incoming message from a platform
+   *
+   * @param message - The incoming message to process
+   * @param platform - The platform the message came from
+   *
+   * @remarks
+   * This method is typically called internally by platform adapters.
+   * It runs the full middleware chain and routes the message to appropriate handlers.
+   *
+   * @internal
    */
   async handleMessage(message: IncomingMessage, platform: IPlatform): Promise<void> {
     try {
@@ -187,6 +405,24 @@ export class Chatbot implements IChatbot {
 
       // Emit message event
       this._emitter.emit('message', ctx);
+
+      // Check for active flows first (flows take priority over commands)
+      let flowHandled = false;
+      for (const flow of this.flows.values()) {
+        await flow.handleMessage(ctx, this.session);
+        // If the flow handled the message (user has active scene), stop processing
+        const sessionKey = `flow:${flow.name}:scene`;
+        const activeScene = await this.session.get(ctx.user.id, ctx.message.platform, sessionKey);
+        if (activeScene) {
+          flowHandled = true;
+          break;
+        }
+      }
+
+      // If a flow handled the message, skip normal routing
+      if (flowHandled) {
+        return;
+      }
 
       // Get router middlewares
       const routerMiddlewares = (this.router as Router).middlewares;
