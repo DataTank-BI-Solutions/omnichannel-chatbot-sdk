@@ -268,3 +268,21 @@ Phase 2 adds essential features for production chatbots including session manage
 - 🔄 **Phase 7:** CLI & Publishing (0%)
 
 See [ROADMAP.md](./ROADMAP.md) for detailed development plan.
+
+### Added - Phase 4: Platform Adapters (Complete)
+
+#### TelegramPlatform
+- Complete Telegram bot integration using grammY library
+- Webhook and polling mode support
+- Full message type support (text, image, video, audio, document, location, contact)
+- Platform-agnostic message normalization
+- Inline keyboard support for interactive buttons
+- Media handling with captions
+- Express webhook callback support
+- 377 lines of production-ready code
+
+#### WhatsAppPlatform
+- Platform structure and placeholder implementation
+- Ready for Baileys or Twilio integration
+- Follows BasePlatform architecture
+
